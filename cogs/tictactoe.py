@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import random
 
-class Games(commands.Cog):
+class Tictactoe(commands.Cog):
     def __init__(self,client):
         self.client = client
         self.winningConditions = [
@@ -129,5 +129,5 @@ class Games(commands.Cog):
             await ctx.channel.purge(limit = 2)
 
 def setup(client):
-    client.add_cog(Games(client))
+    client.add_cog(Tictactoe(client))
 

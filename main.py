@@ -1,15 +1,19 @@
 import discord
 import logging
 import requests
+from lang import LANGUAGES
 import json
 logging.basicConfig(level=logging.INFO)
 from itertools import cycle
 from PIL import Image, ImageFont, ImageDraw
 from io import BytesIO
 import os
-
+from google_trans_new import google_translator
+translator = google_translator()
 from discord.ext import commands, tasks
 client = commands.Bot(command_prefix = '!')
+import aiohttp
+import random
 
 statuses = cycle(["with your wife", "with your life", "chess"])
 client.remove_command("help")
@@ -35,7 +39,14 @@ def get_quote():
     quote = json_data[0]['q'] + ' -' + json_data[0]['a']
     return quote
 
+
 @client.command()
+async def imagetest(ctx):
+    embed = discord.Embed(title="wow")
+    embed.set_image(url="https://i.ytimg.com/vi/358PzjuhhpA/maxresdefault.jpg")
+    await ctx.send(embed=embed)
+
+@client.group(invoke_without_command=True)
 async def help(ctx):
     embed = discord.Embed(title = "Help", colour = discord.Colour.orange())
     embed.add_field(name = "!ping", value = "Returns latency", inline = False)
@@ -50,6 +61,20 @@ async def help(ctx):
     embed.add_field(name = "!meme [optional:subreddit]", value = "Displays a meme", inline = False)
     embed.add_field(name = "!tictactoe @[username] @[username]", value = "Gives warning to users", inline = False)
     embed.add_field(name = "!place [int]", value = "Places a cros or a circle in the tictactoe game", inline = False)
+
+    await ctx.send(embed=embed)
+
+@help.command()
+async def translate(ctx):
+    await ctx.send("Languages Supported for Translation")
+    await ctx.send(LANGUAGES)
+
+@client.command()
+async def translate(ctx, fromlan=None, tolan=None, *, message):
+    translated = translator.translate(message,lang_src=fromlan,lang_tgt=tolan,pronounce=True)
+    embed = discord.Embed(colour = discord.Colour.orange())
+    embed.add_field(name = "Input text", value = message, inline = False)
+    embed.add_field(name = "Translated text", value = translated[0] + " ( "+ translated[2]+ " )", inline = False)
     await ctx.send(embed=embed)
 
 @client.command(aliases =['motivate'])
@@ -57,6 +82,7 @@ async def inspire(ctx):
     quote = get_quote()
     await ctx.send(quote)
 
+@commands.has_role('Moderators')
 @client.command()
 async def clear(ctx, amount : int):
     await ctx.channel.purge(limit = amount+1)
@@ -68,10 +94,12 @@ async def warn(ctx, *, msg):
     reason = msg.split(" ",1)[1]
     await ctx.send(f"{user} You've been WARNED {reason}.")
 
+@commands.has_role('Moderators')
 @client.command()
 async def say(ctx, *, msg):
     await clear(ctx,0)
     await ctx.send(msg)
+
 
 @client.command()
 async def wanted(ctx, user: discord.Member = None, *, msg):
@@ -144,6 +172,6 @@ for filename in os.listdir("./cogs"):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-client.run("ODE0MTQzNTY2MjE3NDc4MTY1.YDZkSA.Bl62V9h_bS9PVZ8hljwPrd1UXsc")
+client.run("ODE1NDgxMTUxMjYyMjk0MDU4.YDtCAQ.sn5nk8wg2ZxGBkTT0OEz8vaO48o")
 
 
