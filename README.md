@@ -76,9 +76,9 @@ If you have a suggestion that would make this better, please fork the repo and c
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <!-- MARKDOWN LINKS -->
-[forks-shield]: https://img.shields.io/github/forks/sajan491/Asuma.svg?style=for-the-badge
+[forks-shield]: https://img.shields.io/github/forks/Sajan491/Asuma.svg?style=for-the-badge
 [forks-url]: https://github.com/Sajan491/Asuma/network/members
-[stars-shield]: https://img.shields.io/github/stars/sajan491/Asuma.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/Sajan491/Asuma.svg?style=for-the-badge
 [stars-url]: https://github.com/Sajan491/Asuma/stargazers
-[license-shield]: https://img.shields.io/github/license/sajan491/Asuma.svg?style=for-the-badge
+[license-shield]: https://img.shields.io/github/license/Sajan491/Asuma.svg?style=for-the-badge
 [license-url]: https://github.com/Sajan491/Asuma/blob/main/LICENSE
