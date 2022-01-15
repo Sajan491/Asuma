@@ -1,21 +1,24 @@
 import discord
-import logging
 import requests
-from lang import LANGUAGES
 import json
-logging.basicConfig(level=logging.INFO)
 from itertools import cycle
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageDraw
 from io import BytesIO
+from utils.languages import LANGUAGES
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 from google_trans_new import google_translator
 translator = google_translator()
-from discord.ext import commands, tasks
-client = commands.Bot(command_prefix = '!')
-import aiohttp
-import random
+from keep_alive import keep_alive
 
-statuses = cycle(["with your wife", "with your life", "chess"])
+from discord.ext import commands, tasks
+client = commands.Bot(command_prefix = '#')
+
+statuses = cycle(["Kaun Banega Crorepati", "with life", "chess"])
 client.remove_command("help")
 #events
 @client.event
@@ -39,43 +42,41 @@ def get_quote():
     quote = json_data[0]['q'] + ' -' + json_data[0]['a']
     return quote
 
-
-@client.command()
-async def imagetest(ctx):
-    embed = discord.Embed(title="wow")
-    embed.set_image(url="https://i.ytimg.com/vi/358PzjuhhpA/maxresdefault.jpg")
-    await ctx.send(embed=embed)
-
 @client.group(invoke_without_command=True)
 async def help(ctx):
     embed = discord.Embed(title = "Help", colour = discord.Colour.orange())
-    embed.add_field(name = "!ping", value = "Returns latency", inline = False)
-    embed.add_field(name = "!say [message]", value = "Says what you ask it to say", inline = False)
-    embed.add_field(name = "!inspire", value = "Prints an inspiring quote", inline = False)
-    embed.add_field(name = "!clear [number]", value = "Clears latest messages", inline = False)
-    embed.add_field(name = "!warn @[username] (reason)", value = "Gives warning to users", inline = False)
-    embed.add_field(name = "!wanted @[username] (reason)", value = "Displays a wanted poster", inline = False)
-    embed.add_field(name = "!rip @[username]", value = "Displays a RIP picture", inline = False)
-    embed.add_field(name = "!whois @[username]", value = "Gives info about a user", inline = False)
-    embed.add_field(name = "!warn @[username] (reason)", value = "Gives warning to users", inline = False)
-    embed.add_field(name = "!meme [optional:subreddit]", value = "Displays a meme", inline = False)
-    embed.add_field(name = "!tictactoe @[username] @[username]", value = "Gives warning to users", inline = False)
-    embed.add_field(name = "!place [int]", value = "Places a cros or a circle in the tictactoe game", inline = False)
+    embed.add_field(name = "#ping", value = "Returns latency", inline = False)
+    
+    embed.add_field(name = "#inspire", value = "Returns an inspiring quote", inline = False)
+    embed.add_field(name = "#clear [number]", value = "Clears latest messages (for moderators only)", inline = False)
+    embed.add_field(name = "#warn @[username] (reason)", value = "Gives warning to users", inline = False)
+    embed.add_field(name = "#wanted @[username] (reason)", value = "Displays a wanted poster", inline = False)
+    embed.add_field(name = "#rip @[username]", value = "Displays a RIP picture", inline = False)
+    embed.add_field(name = "#whois @[username]", value = "Gives info about a user", inline = False)
+    embed.add_field(name = "#meme [optional:subreddit]", value = "Displays a meme", inline = False)
+    embed.add_field(name = "#tictactoe @[username] @[username]", value = "Starts a tictactoe game", inline = False)
+    embed.add_field(name = "#place [int]", value = "Places a cross or a circle in the tictactoe game", inline = False)
+    embed.add_field(name = "#translate [from] [to] [text]", value = "Translates text from one language to another", inline = False)
+    embed.add_field(name = "#help translate", value = "Shows help for translation", inline = False)
+    embed.add_field(name = "#random <search_text> <amount>", value = "Returns random number of queried image", inline = False)
+    embed.add_field(name = "#guesser", value = "Starts the guesser game", inline = False)
+    embed.add_field(name = "#guess <word>", value = "For guessing word in the game", inline = False)
+    embed.add_field(name = "#scoreboard", value = "Shows scoreboard for the guesser game", inline = False)
+    await ctx.send(embed=embed)
 
+
+@client.command()
+async def translate(ctx, fromlang, tolang, *, message):
+    translated = translator.translate(message,lang_src=fromlang,lang_tgt=tolang, pronounce=True)
+    embed = discord.Embed(colour = discord.Colour.orange())
+    embed.add_field(name = "Input text", value = message, inline = False)
+    embed.add_field(name = "Translated text", value = translated[0] + " ( "+ translated[2]+ " )", inline = False)
     await ctx.send(embed=embed)
 
 @help.command()
 async def translate(ctx):
     await ctx.send("Languages Supported for Translation")
     await ctx.send(LANGUAGES)
-
-@client.command()
-async def translate(ctx, fromlan=None, tolan=None, *, message):
-    translated = translator.translate(message,lang_src=fromlan,lang_tgt=tolan,pronounce=True)
-    embed = discord.Embed(colour = discord.Colour.orange())
-    embed.add_field(name = "Input text", value = message, inline = False)
-    embed.add_field(name = "Translated text", value = translated[0] + " ( "+ translated[2]+ " )", inline = False)
-    await ctx.send(embed=embed)
 
 @client.command(aliases =['motivate'])
 async def inspire(ctx):
@@ -87,12 +88,19 @@ async def inspire(ctx):
 async def clear(ctx, amount : int):
     await ctx.channel.purge(limit = amount+1)
 
+@commands.has_role('Moderators')
 @client.command()
-async def warn(ctx, *, msg):
+async def warn(ctx,userr, *, msg=" "):
     await clear(ctx,0)
-    user = msg.split(" ")[0]
-    reason = msg.split(" ",1)[1]
+    user = userr
+    reason = msg
     await ctx.send(f"{user} You've been WARNED {reason}.")
+
+@client.command()
+async def summon(ctx,userr):
+    await clear(ctx,0)
+    user = userr
+    await ctx.send(f"{user}, You've been SUMMONED.")
 
 @commands.has_role('Moderators')
 @client.command()
@@ -100,13 +108,12 @@ async def say(ctx, *, msg):
     await clear(ctx,0)
     await ctx.send(msg)
 
-
 @client.command()
 async def wanted(ctx, user: discord.Member = None, *, msg):
     await clear(ctx,0)
     if user==None:
         await ctx.send("No user included")
-    wanted = Image.open("backg.jpg")
+    wanted = Image.open("assets/wantedBackG.jpg")
     asset = user.avatar_url_as(size = 128)
     data = BytesIO(await asset.read())
     ppic = Image.open(data)
@@ -114,22 +121,22 @@ async def wanted(ctx, user: discord.Member = None, *, msg):
     wanted.paste(ppic,(110,195))
     write = ImageDraw.Draw(wanted)
     write.text((70,380), msg, (0,0,0))
-    wanted.save("profile.jpg")
-    await ctx.send(file = discord.File("profile.jpg"))
+    wanted.save("temp.jpg")
+    await ctx.send(file = discord.File("temp.jpg"))
 
 @client.command()
 async def rip(ctx, user: discord.Member = None):
     await clear(ctx,0)
     if user==None:
         await ctx.send("No user included")
-    wanted = Image.open("rip.png")
+    wanted = Image.open("assets/ripBackG.png")
     asset = user.avatar_url_as(size = 128)
     data = BytesIO(await asset.read())
     ppic = Image.open(data)
     ppic = ppic.resize((200,200))
     wanted.paste(ppic,(304,346))
-    wanted.save("profile.jpg")
-    await ctx.send(file = discord.File("profile.jpg"))
+    wanted.save("temp.jpg")
+    await ctx.send(file = discord.File("temp.jpg"))
 
 @client.command()
 async def whois(ctx, member:discord.Member):
@@ -151,16 +158,19 @@ async def clear_error(ctx, error):
         await ctx.send("Please also include the amount of messages to delete!")
 
 #cogs
+@commands.has_role('Moderators')
 @client.command()
 async def load(ctx, extension):
     client.load_extension(f'cogs.{extension}')
     await ctx.send("Loaded Successfully")
 
+@commands.has_role('Moderators')
 @client.command()
 async def unload(ctx, extension):
     client.unload_extension(f'cogs.{extension}')
     await ctx.send("Unloaded Successfully")
 
+@commands.has_role('Moderators')
 @client.command()
 async def reload(ctx, extension):
     client.unload_extension(f'cogs.{extension}')
@@ -172,6 +182,7 @@ for filename in os.listdir("./cogs"):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-client.run("ODE1NDgxMTUxMjYyMjk0MDU4.YDtCAQ.sn5nk8wg2ZxGBkTT0OEz8vaO48o")
+keep_alive()
+client.run(os.getenv('TOKEN'))
 
 

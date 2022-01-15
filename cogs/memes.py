@@ -2,15 +2,18 @@ import discord
 from discord.ext import commands
 import random
 import praw
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 class Memes(commands.Cog):
     def __init__(self,client):
         self.client = client
-        self.reddit = praw.Reddit(client_id="HBcR9G6Qq_YsUA",
-                    client_secret="YMgUARR946zNzuOjITrKQbYPoiToUw",
-                    username="Sajan491",
-                    password="appleball123",
-                    user_agent="Asuma")
+        self.reddit = praw.Reddit(client_id=os.getenv('CLIENT_ID'),
+                    client_secret=os.getenv('CLIENT_SECRET'),
+                    username=os.getenv('USERNAME'),
+                    password=os.getenv('PASSWORD'),
+                    user_agent=os.getenv('USER_AGENT'))
 
     @commands.command()
     async def meme(self, ctx, subred = "memes"):
@@ -28,4 +31,3 @@ class Memes(commands.Cog):
 
 def setup(client):
     client.add_cog(Memes(client))
-

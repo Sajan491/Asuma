@@ -2,18 +2,19 @@ import discord
 from discord.ext import commands
 import random
 
+
 class Tictactoe(commands.Cog):
-    def __init__(self,client):
+    def __init__(self, client):
         self.client = client
         self.winningConditions = [
-            [0,1,2],
-            [3,4,5],
-            [6,7,8],
-            [0,3,6],
-            [1,4,7],
-            [2,5,8],
-            [0,4,8],
-            [2,4,6]
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
         ]
         self.player1 = ""
         self.player2 = ""
@@ -23,34 +24,34 @@ class Tictactoe(commands.Cog):
         self.count = 0
 
     @commands.command()
-    async def tictactoe(self, ctx, p1 : discord.Member, p2: discord.Member):
+    async def tictactoe(self, ctx, p1: discord.Member, p2: discord.Member):
         if self.gameOver:
             self.gameOver = False
-            self.board = [":white_large_square:",":white_large_square:",":white_large_square:",
-                    ":white_large_square:",":white_large_square:",":white_large_square:",
-                    ":white_large_square:",":white_large_square:",":white_large_square:"]
-            self.player1  = p1
+            self.board = [":white_large_square:", ":white_large_square:", ":white_large_square:",
+                          ":white_large_square:", ":white_large_square:", ":white_large_square:",
+                          ":white_large_square:", ":white_large_square:", ":white_large_square:"]
+            self.player1 = p1
             self.player2 = p2
 
-            #determine who goes first
-            num = random.randint(1,2)
+            # determine who goes first
+            num = random.randint(1, 2)
             if num == 1:
                 self.turn = self.player1
-                await ctx.send("<@" + str(self.player1.id)+ "> goes first as ':regional_indicator_x:' .")
+                await ctx.send("<@" + str(self.player1.id) + "> goes first as ':regional_indicator_x:' .")
             else:
                 self.turn = self.player2
-                await ctx.send("<@" + str(self.player2.id)+ "> goes first as ':o2:' .")
+                await ctx.send("<@" + str(self.player2.id) + "> goes first as ':o2:' .")
 
-            #print the board
+            # print the board
             line = ""
             for x in range(len(self.board)):
-                if x==2 or x==5 or x==8:
+                if x == 2 or x == 5 or x == 8:
                     line += " " + self.board[x]
                     await ctx.send(line)
                     line = ""
                 else:
                     line += " " + self.board[x]
-            await ctx.send("<@" + str(self.turn.id)+ ">'s turn'.")
+            await ctx.send("<@" + str(self.turn.id) + ">'s turn'.")
         else:
             await ctx.send("A game is in progress. Please wait for it to finish.")
 
@@ -67,7 +68,7 @@ class Tictactoe(commands.Cog):
                 if 0 < pos < 10 and self.board[pos - 1] == ":white_large_square:":
                     self.board[pos - 1] = mark
                     self.count += 1
-                    await ctx.channel.purge(limit = 5)
+                    await ctx.channel.purge(limit=5)
 
                     # print the board
                     line = ""
@@ -98,13 +99,12 @@ class Tictactoe(commands.Cog):
                             await ctx.send("<@" + str(self.player1.id)+">'s turn")
                 else:
                     await ctx.send("Be sure to choose an integer between 1 and 9 and an unmarked tile.")
-                    await ctx.channel.purge(limit = 2)
+                    await ctx.channel.purge(limit=2)
             else:
                 await ctx.send("It is not your turn.")
-                await ctx.channel.purge(limit = 2)
+                await ctx.channel.purge(limit=2)
         else:
             await ctx.send("Please start a new game using the !tictactoe command.")
-
 
     def check_winner(self, mark):
         for condition in self.winningConditions:
@@ -123,11 +123,11 @@ class Tictactoe(commands.Cog):
     async def place_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Also include a position in integer to mark.")
-            await ctx.channel.purge(limit = 2)
+            await ctx.channel.purge(limit=2)
         elif isinstance(error, commands.BadArgument):
             await ctx.send("Make sure to enter an integer.")
-            await ctx.channel.purge(limit = 2)
+            await ctx.channel.purge(limit=2)
+
 
 def setup(client):
     client.add_cog(Tictactoe(client))
-
