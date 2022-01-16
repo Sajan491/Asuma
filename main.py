@@ -16,7 +16,12 @@ translator = google_translator()
 from keep_alive import keep_alive
 
 from discord.ext import commands, tasks
-client = commands.Bot(command_prefix = '#')
+from discord import Intents
+from cogs.roleshandler import RolesHandler
+
+intents = Intents.default()
+intents.members = True 
+client = commands.Bot(command_prefix = '#', intents=intents)
 
 statuses = cycle(["Kaun Banega Crorepati", "with life", "chess"])
 client.remove_command("help")
@@ -178,11 +183,13 @@ async def reload(ctx, extension):
     await ctx.send("Reloaded Successfully")
 
 
-for filename in os.listdir("./cogs"):
-    if filename.endswith('.py'):
-        client.load_extension(f'cogs.{filename[:-3]}')
+# for filename in os.listdir("./cogs"):
+#     if filename.endswith('.py'):
+#         client.load_extension(f'cogs.{filename[:-3]}')
 
-keep_alive()
+client.add_cog(RolesHandler(client))
+
+# keep_alive()
 client.run(os.getenv('TOKEN'))
 
 
