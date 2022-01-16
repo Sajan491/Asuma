@@ -182,14 +182,13 @@ async def reload(ctx, extension):
     client.load_extension(f'cogs.{extension}')
     await ctx.send("Reloaded Successfully")
 
+for filename in os.listdir("./cogs"):
+    if filename.endswith('.py'):
+        client.load_extension(f'cogs.{filename[:-3]}')
 
-# for filename in os.listdir("./cogs"):
-#     if filename.endswith('.py'):
-#         client.load_extension(f'cogs.{filename[:-3]}')
+# client.add_cog(RolesHandler(client))
 
-client.add_cog(RolesHandler(client))
-
-# keep_alive()
+keep_alive()
 client.run(os.getenv('TOKEN'))
 
 

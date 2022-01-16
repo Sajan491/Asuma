@@ -4,7 +4,6 @@ import random
 from utils.random_things import diction
 from replit import db
 
-
 class Guesser(commands.Cog):
     def __init__(self,client):
         self.client = client
