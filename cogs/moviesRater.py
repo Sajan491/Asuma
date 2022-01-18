@@ -21,7 +21,7 @@ class MoviesRater(commands.Cog):
 
     @commands.has_role('Moderators')
     @commands.command()
-    async def movie(self, ctx, title):
+    async def movie(self, ctx, *, title):
         embed = discord.Embed(
                 title=f"{title}",
                 colour=1234567,
